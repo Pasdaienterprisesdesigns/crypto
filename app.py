@@ -25,27 +25,31 @@ CRYPTO_TICKERS = {
 # —————————————————————————
 #       FETCH REDDIT DATA
 # —————————————————————————
-def fetch_reddit_data(ticker: str, subreddits, limit: int):
+
+def fetch_reddit_data(ticker, subreddits, post_limit):
     results = []
     for kind in ("submission", "comment"):
         for sub in subreddits:
             params = {
                 "subreddit":  sub,
                 "q":          ticker,
-                "size":       limit,
-                "fields":     ["title" if kind=="submission" else "body", "selftext", "created_utc"],
+                "size":       post_limit,
+                "fields":     ["title","selftext","created_utc"] if kind=="submission" else ["body","created_utc"],
                 "sort":       "desc",
                 "sort_type":  "created_utc"
             }
-            resp = requests.get(f"{PUSHSHIFT_BASE}/{kind}/", params=params, headers=HEADERS)
-            resp.raise_for_status()
-            for d in resp.json().get("data", []):
-                text = (d.get("title") or "") + " " + (d.get("selftext") or "") if kind=="submission" else d.get("body") or ""
+            url = f"{PUSHSHIFT_BASE}/{kind}/"
+            resp = requests.get(url, params=params, headers=HEADERS)
+            resp.raise_for_status()   # this will now succeed over HTTPS
+            for item in resp.json().get("data", []):
+                text = (item.get("title") or "") + " " + (item.get("selftext") or "") \
+                       if kind=="submission" else item.get("body","")
                 results.append({
-                    "text": text,
-                    "created_utc": d.get("created_utc", 0)
+                    "text":        text,
+                    "created_utc": item.get("created_utc", 0)
                 })
     return results
+
 
 # —————————————————————————
 #       SENTIMENT ANALYSIS
