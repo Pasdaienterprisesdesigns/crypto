@@ -6,9 +6,6 @@ import pandas as pd
 import yfinance as yf
 from textblob import TextBlob
 
-# —————————————————————————
-#              CONFIG
-# —————————————————————————
 PUSHSHIFT_BASE = "https://api.pushshift.io/reddit/search"
 HEADERS = {"User-Agent": "crypto-sentiment-analyzer/1.0"}
 
